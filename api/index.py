@@ -16,7 +16,6 @@ if FILE_ID and not FILE_ID.startswith("https://"):
     FILE_URI = f"https://generativelanguage.googleapis.com/v1beta/{FILE_ID}"
 else:
     FILE_URI = FILE_ID
-# -----------------------
 
 client = genai.Client(api_key=API_KEY)
 
