@@ -4,20 +4,12 @@
 # from google.genai import types
 # import os
 
-# from dotenv import load_dotenv
-# load_dotenv()
-
 # app = FastAPI()
 
-# API_KEY = os.environ.get("GEMINI_API_KEY") 
-
-# if not API_KEY:
-#     raise ValueError("No API Key found! Please check your .env file.")
+# API_KEY = os.environ.get("GEMINI_API_KEY")
+# FILE_URI = os.environ.get("GEMINI_FILE_URI")
 
 # client = genai.Client(api_key=API_KEY)
-
-# print("Uploading knowledge base...")
-# file_ref = client.files.upload(file="knowledge_base.pdf", config={'display_name': 'My App Data'})
 
 # SYSTEM_INSTRUCTION = """
 # You are a helpful assistant for a mobile app.
@@ -34,7 +26,10 @@
 #     try:
 #         response = client.models.generate_content(
 #             model="gemini-2.5-flash",
-#             contents=[file_ref, request.question],
+#             contents=[
+#                 types.Part.from_uri(file_uri=FILE_URI, mime_type="application/pdf"), 
+#                 request.question
+#             ],
 #             config=types.GenerateContentConfig(
 #                 system_instruction=SYSTEM_INSTRUCTION,
 #                 temperature=0.3
@@ -48,16 +43,29 @@
 # def health_check():
 #     return {"status": "running"}
 
+# api/index.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from google import genai
 from google.genai import types
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 app = FastAPI()
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
-FILE_URI = os.environ.get("GEMINI_FILE_URI")
+FILE_ID = os.environ.get("GEMINI_FILE_URI") 
+
+# --- THE FIX IS HERE ---
+# We check if the environment variable is just the ID ("files/...") 
+# and convert it to the full URI required by the SDK.
+if FILE_ID and not FILE_ID.startswith("https://"):
+    FILE_URI = f"https://generativelanguage.googleapis.com/v1beta/{FILE_ID}"
+else:
+    FILE_URI = FILE_ID
+# -----------------------
 
 client = genai.Client(api_key=API_KEY)
 
@@ -75,7 +83,7 @@ class ChatRequest(BaseModel):
 def chat_endpoint(request: ChatRequest):
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash",
+            model="gemini-2.0-flash",
             contents=[
                 types.Part.from_uri(file_uri=FILE_URI, mime_type="application/pdf"), 
                 request.question
@@ -87,8 +95,5 @@ def chat_endpoint(request: ChatRequest):
         )
         return {"reply": response.text}
     except Exception as e:
+        print(f"Error: {e}") 
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/")
-def health_check():
-    return {"status": "running"}
