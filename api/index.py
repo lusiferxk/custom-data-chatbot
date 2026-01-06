@@ -34,7 +34,7 @@ class ChatRequest(BaseModel):
 def chat_endpoint(request: ChatRequest):
     try:
         response = client.models.generate_content(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash-lite",
             contents=[
                 types.Part.from_uri(file_uri=FILE_URI, mime_type="application/pdf"), 
                 request.question
