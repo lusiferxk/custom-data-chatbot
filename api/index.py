@@ -11,6 +11,7 @@ app = FastAPI()
 
 API_KEY = os.environ.get("GEMINI_API_KEY")
 FILE_ID = os.environ.get("GEMINI_FILE_URI") 
+MODEL = os.environ.get("MODEL")
 
 if FILE_ID and not FILE_ID.startswith("https://"):
     FILE_URI = f"https://generativelanguage.googleapis.com/v1beta/{FILE_ID}"
@@ -33,7 +34,7 @@ class ChatRequest(BaseModel):
 def chat_endpoint(request: ChatRequest):
     try:
         response = client.models.generate_content(
-            model="gemini-2.5-flash-lite",
+            model=MODEL,
             contents=[
                 types.Part.from_uri(file_uri=FILE_URI, mime_type="application/pdf"), 
                 request.question
