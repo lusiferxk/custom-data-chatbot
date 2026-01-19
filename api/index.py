@@ -9,6 +9,7 @@ load_dotenv()
 
 app = FastAPI()
 
+# env capture
 API_KEY = os.environ.get("GEMINI_API_KEY")
 FILE_ID = os.environ.get("GEMINI_FILE_URI") 
 MODEL = os.environ.get("MODEL")
