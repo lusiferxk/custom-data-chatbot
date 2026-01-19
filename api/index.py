@@ -34,6 +34,8 @@ class ChatRequest(BaseModel):
 @app.post("/chat")
 def chat_endpoint(request: ChatRequest):
     try:
+        print(f"Using File URI: {FILE_URI}")
+        
         response = client.models.generate_content(
             model=MODEL,
             contents=[
